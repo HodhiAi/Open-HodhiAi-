@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hodhi AI</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#111;
+  color:white;
+}
+
+h1{
+  text-align:center;
+}
+
+#chat{
+  height:80vh;
+  overflow:auto;
+  padding:10px;
+}
+
+.user{
+  background:#0066ff;
+  padding:10px;
+  margin:10px;
+  border-radius:10px;
+}
+
+.ai{
+  background:#222;
+  padding:10px;
+  margin:10px;
+  border-radius:10px;
+}
+
+.bottom{
+  display:flex;
+  padding:10px;
+}
+
+input{
+  flex:1;
+  padding:10px;
+  border:none;
+  outline:none;
+}
+
+button{
+  padding:10px 20px;
+}
+</style>
+
+</head>
+<body>
+
+<h1>🤖 Hodhi AI</h1>
+
+<div id="chat"></div>
+
+<div class="bottom">
+  <input type="text" id="msg" placeholder="Ask anything...">
+  <button onclick="askAI()">Send</button>
+</div>
+
+<script>
+
+async function askAI(){
+
+  let msg = document.getElementById("msg").value;
+
+  if(msg=="") return;
+
+  let chat = document.getElementById("chat");
+
+  chat.innerHTML += `
+  <div class="user">${msg}</div>
+  `;
+
+  document.getElementById("msg").value="";
+
+  try{
+
+    let res = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":""
+        },
+        body:JSON.stringify({
+          model:"llama-3.3-70b-versatile",
+          messages:[
+            {
+              role:"user",
+              content:msg
+            }
+          ]
+        })
+      }
+    );
+
+    let data = await res.json();
+
+    console.log(data);
+
+    if(data.choices){
+
+      let reply =
+      data.choices[0].message.content;
+
+      chat.innerHTML += `
+      <div class="ai">${reply}</div>
+      `;
+
+    }else{
+
+      chat.innerHTML += `
+      <div class="ai">
+      Error: ${data.error?.message || "Unknown Error"}
+      </div>
+      `;
+
+    }
+
+  }catch(err){
+
+    chat.innerHTML += `
+    <div class="ai">
+    Network Error: ${err.message}
+    </div>
+    `;
+
+  }
+
+  chat.scrollTop = chat.scrollHeight;
+
+}
+
+</script>
+
+</body>
+</html>
