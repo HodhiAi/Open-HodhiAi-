@@ -1,2 +1,2 @@
-# Open-HodhiAi-
+# Open-HodhiAi
 Open HodhiAi 
